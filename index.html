@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#5d8297">
+  <meta name="description" content="เว็บบอร์ดตารางนัดหมายสำนักงานปศุสัตว์อำเภอดอนจาน จังหวัดกาฬสินธุ์">
+  <title>ตารางนัดหมาย | สำนักงานปศุสัตว์อำเภอดอนจาน</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/dld-logo.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="page-bg" aria-hidden="true">
+    <span class="animal animal-1">🐄</span>
+    <span class="animal animal-2">🐃</span>
+    <span class="animal animal-3">🐖</span>
+    <span class="animal animal-4">🐓</span>
+    <span class="animal animal-5">🐕</span>
+    <span class="animal animal-6">🐈</span>
+  </div>
+
+  <main class="app-shell">
+    <header class="hero-card">
+      <div class="hero-topline">
+        <div class="official-chip"><span class="dot"></span> เว็บบอร์ดออนไลน์</div>
+        <button id="shareBtn" class="icon-btn" type="button" aria-label="แชร์ลิงก์">↗</button>
+      </div>
+      <div class="identity-row">
+        <img class="dld-logo" src="assets/dld-logo.png" alt="ตราสัญลักษณ์กรมปศุสัตว์">
+        <div>
+          <p class="eyebrow">ตารางนัดหมายงาน</p>
+          <h1>สำนักงานปศุสัตว์อำเภอดอนจาน<br><span>จังหวัดกาฬสินธุ์</span></h1>
+          <p class="location-line">📍 ที่ว่าการอำเภอดอนจาน อำเภอดอนจาน จังหวัดกาฬสินธุ์</p>
+        </div>
+      </div>
+      <div class="access-note">ผู้มีลิงก์สามารถดู เพิ่ม และแก้ไขรายการนัดหมายได้</div>
+    </header>
+
+    <section class="status-row" aria-live="polite">
+      <div><span id="connectionDot" class="status-dot"></span><span id="connectionText">กำลังเชื่อมต่อฐานข้อมูล…</span></div>
+      <span id="todayLabel"></span>
+    </section>
+
+    <nav class="view-tabs" aria-label="เลือกมุมมองตารางนัดหมาย">
+      <button class="view-tab" data-view="week" type="button">รายสัปดาห์</button>
+      <button class="view-tab active" data-view="month" type="button">รายเดือน</button>
+      <button class="view-tab" data-view="year" type="button">รายปี</button>
+    </nav>
+
+    <section class="period-controls">
+      <button id="prevPeriod" class="nav-btn" type="button" aria-label="ช่วงก่อนหน้า">‹</button>
+      <div class="period-title-wrap">
+        <strong id="periodTitle">กำลังโหลด…</strong>
+        <button id="todayBtn" type="button">วันนี้</button>
+      </div>
+      <button id="nextPeriod" class="nav-btn" type="button" aria-label="ช่วงถัดไป">›</button>
+    </section>
+
+    <section id="setupNotice" class="setup-notice hidden" role="alert">
+      <strong>ยังไม่พบตารางฐานข้อมูล</strong>
+      <span>ให้นำไฟล์ <code>supabase-schema.sql</code> ไปรันใน Supabase SQL Editor ก่อน แล้วรีเฟรชหน้านี้</span>
+    </section>
+
+    <section id="viewRoot" class="view-root" aria-live="polite"></section>
+
+    <footer class="office-footer">
+      <div class="map-visual" aria-hidden="true">
+        <svg viewBox="0 0 260 110" role="img">
+          <path d="M15 78 C42 34,74 24,104 48 C129 68,151 20,188 31 C214 38,237 55,246 85 C201 102,160 84,128 95 C91 108,47 99,15 78Z" fill="#dce9df" stroke="#6d9278" stroke-width="2"/>
+          <path d="M29 76 C72 66,96 73,125 58 C160 40,191 53,230 75" fill="none" stroke="#b9cfbf" stroke-width="3" stroke-dasharray="5 5"/>
+          <circle cx="136" cy="57" r="8" fill="#c75b45"/>
+          <path d="M136 68 C127 57,125 52,125 47 A11 11 0 1 1 147 47 C147 52,145 57,136 68Z" fill="#c75b45"/>
+          <circle cx="136" cy="47" r="4" fill="#fff"/>
+        </svg>
+        <span>แผนที่อำเภอดอนจาน</span>
+      </div>
+      <div class="footer-address">
+        <strong>📍 ที่ว่าการอำเภอดอนจาน</strong>
+        <span>อำเภอดอนจาน จังหวัดกาฬสินธุ์</span>
+      </div>
+      <div class="animal-strip" aria-hidden="true">🐓　🐄　🐃　🐖　🐕　🐈</div>
+    </footer>
+  </main>
+
+  <button id="addAppointmentBtn" class="fab" type="button" aria-label="เพิ่มนัดหมาย"><span>＋</span> เพิ่มนัดหมาย</button>
+
+  <dialog id="appointmentDialog" class="appointment-dialog">
+    <form id="appointmentForm" method="dialog" novalidate>
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">จัดการรายการ</p>
+          <h2 id="dialogTitle">เพิ่มนัดหมาย</h2>
+        </div>
+        <button id="closeDialogBtn" class="close-btn" type="button" aria-label="ปิด">×</button>
+      </div>
+
+      <input type="hidden" id="appointmentId" name="id">
+
+      <div class="form-grid">
+        <label class="field full">
+          <span>ชื่อกิจกรรม <b>*</b></span>
+          <input id="titleInput" name="title" type="text" maxlength="180" required placeholder="เช่น ประชุมประจำเดือน">
+        </label>
+
+        <label class="field">
+          <span>วัน <b>*</b></span>
+          <input id="dateInput" name="appointment_date" type="date" required>
+        </label>
+
+        <label class="check-field">
+          <input id="allDayInput" name="is_all_day" type="checkbox">
+          <span>ทั้งวัน</span>
+        </label>
+
+        <label class="field time-field">
+          <span>เวลาเริ่ม</span>
+          <input id="startTimeInput" name="start_time" type="time">
+        </label>
+
+        <label class="field time-field">
+          <span>เวลาสิ้นสุด</span>
+          <input id="endTimeInput" name="end_time" type="time">
+        </label>
+
+        <label class="field full">
+          <span>สถานที่ <b>*</b></span>
+          <input id="locationInput" name="location" type="text" maxlength="220" required placeholder="ระบุสถานที่จัดกิจกรรม">
+        </label>
+
+        <label class="field full">
+          <span>การแต่งกาย</span>
+          <input id="dressInput" name="dress_code" type="text" maxlength="180" placeholder="เช่น ชุดปฏิบัติงาน / ชุดสุภาพ">
+        </label>
+
+        <label class="field full">
+          <span>ผู้เข้าร่วม/มอบหมาย <b>*</b></span>
+          <textarea id="participantsInput" name="participants" rows="2" maxlength="500" required placeholder="ระบุชื่อหรือกลุ่มผู้รับผิดชอบ"></textarea>
+        </label>
+
+        <label class="field full">
+          <span>หมายเหตุ</span>
+          <textarea id="noteInput" name="note" rows="3" maxlength="800" placeholder="รายละเอียดเพิ่มเติม"></textarea>
+        </label>
+
+        <label class="field full">
+          <span>ชื่อผู้บันทึก</span>
+          <input id="editorInput" name="editor" type="text" maxlength="120" placeholder="ชื่อผู้เพิ่มหรือแก้ไขข้อมูล">
+        </label>
+      </div>
+
+      <p class="form-hint">ข้อมูลที่บันทึกจะแสดงแก่ทุกคนที่เปิดลิงก์นี้</p>
+
+      <div class="dialog-actions">
+        <button id="cancelDialogBtn" class="secondary-btn" type="button">ยกเลิก</button>
+        <button id="saveAppointmentBtn" class="primary-btn" type="submit">บันทึกนัดหมาย</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <template id="eventCardTemplate">
+    <article class="event-card">
+      <div class="event-datebox"><strong></strong><span></span></div>
+      <div class="event-main">
+        <div class="event-heading"><h3></h3><button type="button" class="edit-event">แก้ไข</button></div>
+        <p class="event-time"></p>
+        <dl class="event-details"></dl>
+      </div>
+    </article>
+  </template>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "ตารางนัดหมายสำนักงานปศุสัตว์อำเภอดอนจาน",
+  "short_name": "นัดหมายดอนจาน",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#edf3f4",
+  "theme_color": "#5d8297",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "assets/dld-logo.png",
+      "sizes": "220x215",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
